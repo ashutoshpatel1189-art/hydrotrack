@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="HydroTrack"/>
+<meta name="theme-color" content="#1D9E75"/>
+<title>HydroTrack — 5L Daily Goal</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon.png"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100vh;background:#0F6E56;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.app{max-width:430px;margin:0 auto;min-height:100vh;background:#f0fdf8;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,16px)}
+.hdr{background:linear-gradient(135deg,#0F6E56,#1D9E75,#185FA5);padding:calc(env(safe-area-inset-top,0px) + 16px) 20px 28px;color:#fff;position:relative;overflow:hidden}
+.hdr::after{content:'';position:absolute;bottom:-20px;left:0;right:0;height:40px;background:#f0fdf8;border-radius:24px 24px 0 0}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.hdr-title{font-size:20px;font-weight:700}
+.hdr-title span{font-size:12px;font-weight:400;opacity:0.75;display:block;margin-top:1px}
+.hdr-date{background:rgba(255,255,255,0.18);border-radius:99px;padding:4px 12px;font-size:12px;font-weight:500}
+.hdr-main{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.hdr-drank{font-size:54px;font-weight:700;line-height:1;letter-spacing:-2px}
+.hdr-drank sup{font-size:20px;font-weight:400;letter-spacing:0;opacity:0.8}
+.hdr-goal{font-size:13px;opacity:0.75;margin-top:4px}
+.hdr-pct{width:72px;height:72px;position:relative;flex-shrink:0}
+.hdr-pct svg{width:72px;height:72px;transform:rotate(-90deg)}
+.hdr-pct-lbl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff}
+.milestone{margin:12px 16px 0;padding:10px 14px;border-radius:12px;font-size:13px;font-weight:600;text-align:center;display:none}
+.milestone.half{background:#FAEEDA;color:#633806}
+.milestone.done{background:#E1F5EE;color:#085041}
+.milestone.show{display:block}
+.bottle-hero{display:flex;align-items:center;justify-content:center;padding:20px 16px 8px;gap:20px}
+.big-btl{position:relative;display:flex;flex-direction:column;align-items:center}
+.big-btl svg{width:100px;height:220px}
+.big-btl-pct{position:absolute;top:52%;left:50%;transform:translate(-50%,-50%);font-size:20px;font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.35);pointer-events:none}
+.big-btl-lbl{font-size:12px;color:#6c757d;margin-top:6px;font-weight:500}
+.side-stats{flex:1;display:flex;flex-direction:column;gap:10px}
+.stat{background:#fff;border-radius:14px;padding:11px 13px;border:1.5px solid #E1F5EE}
+.stat-lbl{font-size:11px;color:#6c757d;font-weight:500;margin-bottom:2px;text-transform:uppercase;letter-spacing:0.4px}
+.stat-val{font-size:21px;font-weight:700}
+.g{color:#1D9E75}.b{color:#185FA5}.a{color:#854F0B}.p{color:#534AB7}
+.stat-sub{font-size:11px;color:#adb5bd;margin-top:1px}
+.prog-section{padding:0 16px 14px}
+.prog-lbl{display:flex;justify-content:space-between;font-size:12px;color:#6c757d;margin-bottom:6px;font-weight:500}
+.prog-bg{height:14px;border-radius:99px;background:#e9ecef;overflow:hidden}
+.prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#1D9E75,#185FA5);transition:width 0.5s ease}
+.stats2{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 14px}
+.grid-section{padding:0 16px 12px}
+.sec-title{font-size:13px;font-weight:600;color:#495057;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sec-title::after{content:'';flex:1;height:1px;background:#dee2e6}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.gb{background:#fff;border:2px solid #9FE1CB;border-radius:12px;padding:8px 4px 5px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:all 0.15s;-webkit-user-select:none;user-select:none;-webkit-appearance:none}
+.gb:active{transform:scale(0.9)}
+.gb.done{background:#E1F5EE;border-color:#1D9E75}
+.gb svg{width:26px;height:54px}
+.gb-n{font-size:10px;font-weight:600;color:#adb5bd}
+.gb.done .gb-n{color:#0F6E56}
+.qa-section{padding:0 16px 12px}
+.qa-chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:9px 14px;border-radius:99px;border:2px solid #9FE1CB;background:#fff;color:#0F6E56;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;-webkit-appearance:none}
+.chip:active{background:#E1F5EE;border-color:#1D9E75;transform:scale(0.95)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 12px}
+.btn-add{background:linear-gradient(135deg,#1D9E75,#185FA5);color:#fff;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;-webkit-appearance:none}
+.btn-add:active{opacity:0.85}
+.btn-reset{background:#fff;color:#495057;border:2px solid #dee2e6;border-radius:14px;padding:15px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;-webkit-appearance:none}
+.btn-reset:active{background:#e9ecef}
+.tip{margin:0 16px 16px;background:#E6F1FB;border:1.5px solid #B5D4F4;border-radius:14px;padding:12px 14px;font-size:13px;color:#042C53;line-height:1.55;display:flex;gap:10px;align-items:flex-start}
+.tip-icon{font-size:22px;flex-shrink:0}
+.install-banner{margin:0 16px 12px;background:#fff;border:2px solid #1D9E75;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.install-banner .ib-text{flex:1;font-size:13px;color:#085041;font-weight:500;line-height:1.4}
+.install-banner .ib-close{background:none;border:none;font-size:18px;color:#adb5bd;cursor:pointer;padding:4px}
+.foot{padding:8px 16px 4px;text-align:center;font-size:11px;color:#adb5bd}
+.toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);left:50%;transform:translateX(-50%) translateY(60px);background:#212529;color:#fff;padding:10px 22px;border-radius:99px;font-size:13px;font-weight:500;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;z-index:999}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hdr">
+    <div class="hdr-top">
+      <div class="hdr-title">💧 HydroTrack<span>Daily water tracker</span></div>
+      <div class="hdr-date" id="dateLabel">Today</div>
+    </div>
+    <div class="hdr-main">
+      <div>
+        <div class="hdr-drank" id="drankDisp">0.0<sup>L</sup></div>
+        <div class="hdr-goal">of 5.0 L daily goal</div>
+      </div>
+      <div class="hdr-pct">
+        <svg viewBox="0 0 72 72">
+          <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="7"/>
+          <circle cx="36" cy="36" r="30" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-dasharray="188.5" id="pctCircle" stroke-dashoffset="188.5" style="transition:stroke-dashoffset 0.5s ease"/>
+        </svg>
+        <div class="hdr-pct-lbl" id="pctLabel">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="milestone half" id="m50">🎉 Halfway there — keep going!</div>
+  <div class="milestone done" id="m100">🏆 Goal reached! Amazing work today!</div>
+
+  <div id="installBanner" class="install-banner" style="display:none;margin-top:12px">
+    <span style="font-size:22px">📲</span>
+    <div class="ib-text">Add to home screen for app-like experience! Tap Share → "Add to Home Screen"</div>
+    <button class="ib-close" onclick="document.getElementById('installBanner').style.display='none'">✕</button>
+  </div>
+
+  <div class="bottle-hero">
+    <div class="big-btl">
+      <svg viewBox="0 0 100 220" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="bigClip">
+            <path d="M32,42 L20,62 L12,88 L10,205 Q10,214 22,214 L78,214 Q90,214 90,205 L88,88 L80,62 L68,42 Z"/>
+          </clipPath>
+        </defs>
+        <rect x="36" y="8" width="28" height="14" rx="5" fill="#0F6E56"/>
+        <rect x="32" y="20" width="36" height="22" rx="4" fill="#1D9E75"/>
+        <path d="M32,42 L20,62 L12,88 L10,205 Q10,214 22,214 L78,214 Q90,214 90,205 L88,88 L80,62 L68,42 Z" fill="#f0fdf8" stroke="#1D9E75" stroke-width="2.5"/>
+        <rect id="bigWater" x="10" y="214" width="80" height="0" clip-path="url(#bigClip)" fill="#1D9E75" style="transition:y 0.7s ease,height 0.7s ease"/>
+        <rect id="bigWaterLight" x="10" y="214" width="80" height="8" clip-path="url(#bigClip)" fill="#5DCAA5" style="transition:y 0.7s ease"/>
+        <line x1="12" y1="165" x2="88" y2="165" stroke="#9FE1CB" stroke-width="0.8" stroke-dasharray="4,4"/>
+        <line x1="12" y1="135" x2="88" y2="135" stroke="#9FE1CB" stroke-width="0.8" stroke-dasharray="4,4"/>
+        <line x1="12" y1="105" x2="88" y2="105" stroke="#9FE1CB" stroke-width="0.8" stroke-dasharray="4,4"/>
+        <line x1="12" y1="75" x2="88" y2="75" stroke="#9FE1CB" stroke-width="0.8" stroke-dasharray="4,4"/>
+        <text x="92" y="168" font-size="9" fill="#1D9E75" font-weight="600">1L</text>
+        <text x="92" y="138" font-size="9" fill="#1D9E75" font-weight="600">2L</text>
+        <text x="92" y="108" font-size="9" fill="#1D9E75" font-weight="600">3L</text>
+        <text x="92" y="78" font-size="9" fill="#1D9E75" font-weight="600">4L</text>
+        <path d="M24,70 Q26,110 24,150" stroke="rgba(255,255,255,0.5)" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="big-btl-pct" id="bigPct">0%</div>
+      <div class="big-btl-lbl">5.0 L Bottle</div>
+    </div>
+    <div class="side-stats">
+      <div class="stat"><div class="stat-lbl">Consumed</div><div class="stat-val g" id="s1">0.0 L</div><div class="stat-sub" id="sub1">0 ml</div></div>
+      <div class="stat"><div class="stat-lbl">Remaining</div><div class="stat-val b" id="s2">5.0 L</div><div class="stat-sub" id="sub2">5000 ml</div></div>
+      <div class="stat"><div class="stat-lbl">Bottles done</div><div class="stat-val a" id="s3">0 / 10</div><div class="stat-sub">×500 ml each</div></div>
+      <div class="stat"><div class="stat-lbl">Next target</div><div class="stat-val p" id="s4">500 ml</div><div class="stat-sub">keep going!</div></div>
+    </div>
+  </div>
+
+  <div class="prog-section">
+    <div class="prog-lbl"><span id="progL">0 L consumed</span><span>5 L goal</span></div>
+    <div class="prog-bg"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="stats2">
+    <div class="stat"><div class="stat-lbl">Completion</div><div class="stat-val g" id="pctStat">0%</div><div class="stat-sub">of daily goal</div></div>
+    <div class="stat"><div class="stat-lbl">Bottles left</div><div class="stat-val b" id="btlLeft">10</div><div class="stat-sub">to reach goal</div></div>
+  </div>
+
+  <div class="grid-section">
+    <div class="sec-title">Tap a bottle to log 500 ml</div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="qa-section">
+    <div class="sec-title">Quick add</div>
+    <div class="qa-chips">
+      <button class="chip" onclick="addMl(100)">+100 ml</button>
+      <button class="chip" onclick="addMl(250)">+250 ml</button>
+      <button class="chip" onclick="addMl(500)">+500 ml</button>
+      <button class="chip" onclick="addMl(750)">+750 ml</button>
+      <button class="chip" onclick="addMl(1000)">+1 L</button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn-add" onclick="addMl(500)">🍶 Add bottle</button>
+    <button class="btn-reset" onclick="resetDay()">🔄 Reset day</button>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span>5 L is a big goal! Aim for <strong>500 ml every 90 minutes</strong>. Set phone alarms to remind yourself every hour and a half.</span>
+  </div>
+
+  <div class="foot">HydroTrack • Stay hydrated every day 💧</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GOAL=5000,BOTTLE=500,TOTAL=GOAL/BOTTLE;
+let ml=0;
+
+function init(){
+  const d=new Date();
+  document.getElementById('dateLabel').textContent=d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+  const today=d.toDateString();
+  if(localStorage.getItem('h_date')===today){
+    ml=parseInt(localStorage.getItem('h_ml')||'0');
+  } else {
+    localStorage.setItem('h_date',today);
+    ml=0;
+  }
+  if(!localStorage.getItem('h_banner')){
+    const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isAndroid=/android/i.test(navigator.userAgent);
+    const standalone=window.navigator.standalone||window.matchMedia('(display-mode: standalone)').matches;
+    if((isIOS||isAndroid)&&!standalone){
+      document.getElementById('installBanner').style.display='flex';
+      localStorage.setItem('h_banner','shown');
+    }
+  }
+  buildGrid();update();
+}
+
+function save(){localStorage.setItem('h_ml',ml);}
+
+function buildGrid(){
+  const g=document.getElementById('grid');
+  g.innerHTML='';
+  for(let i=0;i<TOTAL;i++){
+    const done=(i+1)*BOTTLE<=ml;
+    const b=document.createElement('button');
+    b.className='gb'+(done?' done':'');
+    b.setAttribute('aria-label','Bottle '+(i+1));
+    const wY=done?14:52,wH=done?38:0;
+    const cap=done?'#0F6E56':'#9FE1CB';
+    const neck=done?'#1D9E75':'#5DCAA5';
+    const body=done?'#E1F5EE':'#fff';
+    const str=done?'#1D9E75':'#9FE1CB';
+    const wat=done?'#1D9E75':'#9FE1CB';
+    b.innerHTML=`<svg width="26" height="54" viewBox="0 0 26 54" xmlns="http://www.w3.org/2000/svg">
+      <defs><clipPath id="gc${i}"><path d="M8,12 L5,18 L3,24 L2,49 Q2,52 6,52 L20,52 Q24,52 24,49 L23,24 L21,18 L18,12 Z"/></clipPath></defs>
+      <rect x="9" y="2" width="8" height="5" rx="2" fill="${cap}"/>
+      <rect x="7" y="6" width="12" height="7" rx="2" fill="${neck}"/>
+      <path d="M8,12 L5,18 L3,24 L2,49 Q2,52 6,52 L20,52 Q24,52 24,49 L23,24 L21,18 L18,12 Z" fill="${body}" stroke="${str}" stroke-width="1.5"/>
+      <rect x="2" y="${wY}" width="22" height="${wH}" clip-path="url(#gc${i})" fill="${wat}"/>
+    </svg><span class="gb-n">${i+1}</span>`;
+    b.addEventListener('click',()=>{
+      ml=(i+1)*BOTTLE<=ml?i*BOTTLE:(i+1)*BOTTLE;
+      save();buildGrid();update();
+      toast('Bottle '+(i+1)+' — '+((i+1)*BOTTLE)+' ml');
+    });
+    g.appendChild(b);
+  }
+}
+
+function update(){
+  ml=Math.max(0,Math.min(GOAL,ml));
+  const pct=Math.round((ml/GOAL)*100);
+  const L=(ml/1000).toFixed(1);
+  const rem=GOAL-ml;
+  const btlDone=Math.floor(ml/BOTTLE);
+  document.getElementById('drankDisp').innerHTML=L+'<sup>L</sup>';
+  document.getElementById('s1').textContent=L+' L';
+  document.getElementById('sub1').textContent=ml+' ml';
+  document.getElementById('s2').textContent=(rem/1000).toFixed(1)+' L';
+  document.getElementById('sub2').textContent=rem+' ml';
+  document.getElementById('s3').textContent=btlDone+' / '+TOTAL;
+  document.getElementById('s4').textContent=ml>=GOAL?'Done!':(btlDone+1)*BOTTLE+' ml';
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progL').textContent=L+' L consumed';
+  document.getElementById('pctLabel').textContent=pct+'%';
+  document.getElementById('pctStat').textContent=pct+'%';
+  document.getElementById('btlLeft').textContent=TOTAL-btlDone;
+  document.getElementById('bigPct').textContent=pct+'%';
+  const offset=188.5-(188.5*pct/100);
+  document.getElementById('pctCircle').style.strokeDashoffset=offset;
+  const wH=Math.round((pct/100)*130);
+  const wY=214-wH;
+  document.getElementById('bigWater').setAttribute('y',wY);
+  document.getElementById('bigWater').setAttribute('height',wH);
+  document.getElementById('bigWaterLight').setAttribute('y',wY-4);
+  document.getElementById('m50').className='milestone half'+(pct>=50&&pct<100?' show':'');
+  document.getElementById('m100').className='milestone done'+(pct>=100?' show':'');
+}
+
+function addMl(v){ml=Math.min(GOAL,ml+v);save();buildGrid();update();toast('+'+v+' ml added');}
+function resetDay(){if(confirm('Reset today\'s intake?')){ml=0;save();buildGrid();update();toast('Day reset');}}
+
+let tt;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+init();
+</script>
+</body>
+</html>
