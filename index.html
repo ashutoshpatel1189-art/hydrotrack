@@ -1,467 +1,829 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HydroTrack Pro</title>
-	<style>
-	*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family: Arial, sans-serif;
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="HydroTrack"/>
+<meta name="theme-color" content="#2d7a4f"/>
+<title>HydroTrack – Daily Water Tracker</title>
+<style>
+:root{
+  --g1:#0d4a2a;--g2:#1a6b40;--g3:#2d8f58;--g4:#3daa6e;--g5:#6fc98e;--g6:#a8ddb8;--g7:#d6f0df;--g8:#edf8f1;--g9:#f5fbf7;
+  --bg:#edf8f1;--card:#fff;--text:#0d2e1a;--sub:#2d6040;--muted:#6a9e7a;--border:#c8e8d4;
+  --shadow:0 2px 20px rgba(29,107,64,0.10);
+  --radius:18px;
 }
+[data-dark="1"]{
+  --bg:#081a0f;--card:#0f2418;--text:#e0f5e8;--sub:#7ecf96;--muted:#3d7a50;--border:#1a3d28;--g7:#0f2418;--g8:#091a10;--g9:#060f09;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;transition:background .3s,color .3s}
+.app{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;position:relative}
 
-body{
-    background: linear-gradient(180deg,#eaf7e3,#d8f0ce);
-    padding:30px;
-    display:flex;
-    justify-content:center;
-}
+/* SCREENS */
+.screen{display:none;flex-direction:column;flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:86px;-webkit-overflow-scrolling:touch}
+.screen.active{display:flex}
 
-.app{
-    width:420px;
-    background:#f9fff7;
-    border-radius:30px;
-    padding:24px;
-    box-shadow:0 20px 60px rgba(0,0,0,0.15);
-}
+/* TOP BAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;
+  padding:calc(env(safe-area-inset-top,0px)+12px) 18px 12px;
+  background:var(--card);border-bottom:1.5px solid var(--border);
+  position:sticky;top:0;z-index:30;box-shadow:0 2px 8px rgba(29,107,64,0.06)}
+.brand{display:flex;align-items:center;gap:8px}
+.brand-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--g3),var(--g4));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.brand-text{font-size:16px;font-weight:800;color:var(--text);line-height:1.1}
+.brand-text small{display:block;font-size:10px;font-weight:500;color:var(--muted)}
+.topbar-r{display:flex;align-items:center;gap:8px}
+.date-pill{background:var(--g7);border-radius:99px;padding:5px 11px;font-size:11px;font-weight:700;color:var(--g2)}
+.icon-btn{width:34px;height:34px;border-radius:50%;background:var(--g8);border:1.5px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--g2)}
+.icon-btn:active{background:var(--g7)}
 
-.header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
+/* ══ HOME ══ */
+/* HERO BANNER */
+.hero{background:linear-gradient(160deg,#1a6b40 0%,#2d8f58 45%,#1a5c35 100%);
+  padding:22px 20px 0;position:relative;overflow:hidden;min-height:330px}
+.hero-bg-circle{position:absolute;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,0.04);top:-80px;right:-80px;pointer-events:none}
+.hero-bg-circle2{position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.03);bottom:-40px;left:-40px;pointer-events:none}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.hero-label{font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);margin-bottom:2px}
+.hero-amount{font-size:58px;font-weight:900;color:#fff;line-height:1;letter-spacing:-3px}
+.hero-amount sup{font-size:22px;font-weight:500;letter-spacing:0;opacity:.8}
+.hero-sub{font-size:13px;color:rgba(255,255,255,0.6);margin-top:3px}
 
-.header h1{
-    color:#2e7d32;
-}
+/* RING */
+.ring-wrap{position:relative;width:90px;height:90px;flex-shrink:0}
+.ring-wrap svg{width:90px;height:90px;transform:rotate(-90deg)}
+.ring-pct{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;line-height:1}
+.ring-pct small{font-size:9px;font-weight:500;opacity:.7;letter-spacing:.5px}
 
-.header p{
-    color:#666;
-    font-size:14px;
-}
+/* BOTTLE SVG */
+.hero-bottle-row{display:flex;justify-content:center;padding-top:10px;position:relative;z-index:2}
+.hero-bottle-row svg{width:130px;height:220px;filter:drop-shadow(0 8px 24px rgba(0,0,0,0.25))}
 
-#darkToggle{
-    border:none;
-    padding:12px;
-    border-radius:50%;
-    cursor:pointer;
-}
+/* WAVE BOTTOM */
+.hero-wave{display:block;width:100%;margin-bottom:-2px}
 
-.goal-box{
-    margin-top:20px;
-    background:white;
-    padding:18px;
-    border-radius:20px;
-    box-shadow:0 6px 18px rgba(0,0,0,0.08);
-}
+/* STAT CARDS */
+.stat-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 16px 0}
+.sc{background:var(--card);border-radius:var(--radius);padding:13px 14px;border:1.5px solid var(--border);box-shadow:var(--shadow);display:flex;align-items:center;gap:10px}
+.sc-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.sc-icon.green{background:#e6f7ed}
+.sc-icon.blue{background:#e6f0fb}
+.sc-icon.amber{background:#fef3e2}
+.sc-icon.purple{background:#f0effe}
+[data-dark="1"] .sc-icon.green{background:#0f2e1a}
+[data-dark="1"] .sc-icon.blue{background:#0d1e2e}
+[data-dark="1"] .sc-icon.amber{background:#2a1e08}
+[data-dark="1"] .sc-icon.purple{background:#1a1730}
+.sc-body{}
+.sc-lbl{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.sc-val{font-size:20px;font-weight:800;color:var(--text);line-height:1.1}
+.sc-sub{font-size:10px;color:var(--muted)}
 
-.goal-input{
-    display:flex;
-    gap:10px;
-    margin-top:10px;
-}
+/* PROGRESS BAR */
+.prog-wrap{padding:14px 16px 0}
+.prog-head{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--sub);margin-bottom:7px}
+.prog-bg{height:13px;border-radius:99px;background:var(--g7);overflow:hidden;border:1px solid var(--border)}
+.prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--g4),var(--g3));transition:width .6s cubic-bezier(.4,0,.2,1)}
 
-.goal-input input{
-    flex:1;
-    padding:12px;
-    border-radius:12px;
-    border:1px solid #ccc;
-}
+/* QUICK ADD */
+.section{padding:14px 16px 0}
+.sec-hdr{font-size:14px;font-weight:800;color:var(--text);margin-bottom:10px}
+.qa-row{display:flex;gap:8px}
+.qa-btn{flex:1;border:2px solid var(--border);background:var(--card);border-radius:14px;padding:11px 4px 8px;font-size:12px;font-weight:700;color:var(--sub);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .18s;-webkit-appearance:none}
+.qa-btn .drop{font-size:22px;line-height:1}
+.qa-btn.sel,.qa-btn:active{background:var(--g3);border-color:var(--g3);color:#fff}
+.qa-btn.sel .drop,.qa-btn:active .drop{filter:brightness(10)}
 
-.goal-input button{
-    padding:12px 18px;
-    background:#2e7d32;
-    color:white;
-    border:none;
-    border-radius:12px;
-}
+/* TIP */
+.tip-card{margin:14px 16px 0;background:var(--g8);border-radius:var(--radius);padding:13px 15px;display:flex;gap:11px;align-items:flex-start;border:1.5px solid var(--border)}
+.tip-icon{font-size:24px;flex-shrink:0;margin-top:1px}
+.tip-title{font-size:12px;font-weight:800;color:var(--g2);margin-bottom:3px}
+.tip-body{font-size:13px;color:var(--sub);line-height:1.5}
 
-.hero{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-top:25px;
-}
+/* ACTION BUTTONS */
+.action-row{display:grid;grid-template-columns:2fr 1fr;gap:10px;padding:14px 16px 0}
+.btn-add{background:linear-gradient(135deg,var(--g2),var(--g3));color:#fff;border:none;border-radius:16px;padding:16px;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(29,107,64,0.35);-webkit-appearance:none;transition:transform .15s,box-shadow .15s}
+.btn-add:active{transform:scale(0.97);box-shadow:0 2px 8px rgba(29,107,64,0.2)}
+.btn-reset{background:var(--card);color:var(--sub);border:2px solid var(--border);border-radius:16px;padding:16px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;-webkit-appearance:none}
+.btn-reset:active{background:var(--g8)}
 
-.progress-left h2{
-    color:#2e7d32;
-}
+/* ══ HISTORY ══ */
+.history-list{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.hi-item{background:var(--card);border-radius:var(--radius);padding:14px 16px;border:1.5px solid var(--border);box-shadow:var(--shadow)}
+.hi-top{display:flex;justify-content:space-between;margin-bottom:8px;align-items:center}
+.hi-date{font-size:13px;font-weight:700;color:var(--text)}
+.hi-badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px}
+.hi-badge.hit{background:#e6f7ed;color:#1a6b40}
+.hi-badge.miss{background:#fef3e2;color:#9a6000}
+[data-dark="1"] .hi-badge.hit{background:#0f2e1a;color:#6fc98e}
+[data-dark="1"] .hi-badge.miss{background:#2a1e08;color:#d4a830}
+.hi-bar-wrap{height:10px;background:var(--g8);border-radius:99px;overflow:hidden}
+.hi-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--g4),var(--g3));transition:width .6s ease}
+.hi-bottom{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--muted)}
 
-.progress-left h3{
-    font-size:48px;
-    color:#1b5e20;
-}
+/* WEEK CHART */
+.chart-card{background:var(--card);border-radius:var(--radius);padding:16px;border:1.5px solid var(--border);box-shadow:var(--shadow);margin:14px 16px 0}
+.chart-bars{display:flex;align-items:flex-end;justify-content:space-between;gap:6px;height:110px;margin-top:10px}
+.cbar-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.cbar{width:100%;border-radius:6px 6px 0 0;background:var(--g6);min-height:4px;transition:height .5s ease}
+.cbar.today{background:linear-gradient(180deg,var(--g4),var(--g2))}
+.cbar.hit{background:linear-gradient(180deg,var(--g5),var(--g3))}
+.cbar-day{font-size:10px;color:var(--muted);font-weight:700}
+.cbar-ml{font-size:9px;color:var(--sub);font-weight:600}
 
-.progress-circle{
-    position:relative;
-}
+/* ══ STATS ══ */
+.streak-banner{margin:14px 16px 0;background:linear-gradient(135deg,var(--g1),var(--g3));border-radius:var(--radius);padding:22px 20px;color:#fff;display:flex;align-items:center;justify-content:space-between}
+.streak-left .num{font-size:56px;font-weight:900;line-height:1}
+.streak-left .lbl{font-size:13px;opacity:.8;margin-top:3px}
+.streak-icon{font-size:56px;line-height:1}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 16px 0}
+.stats-card{background:var(--card);border-radius:var(--radius);padding:16px;border:1.5px solid var(--border);box-shadow:var(--shadow);text-align:center}
+.stats-card .big{font-size:30px;font-weight:900;color:var(--g2)}
+.stats-card .lbl{font-size:11px;color:var(--muted);margin-top:5px;font-weight:600}
 
-.percentage{
-    position:absolute;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:24px;
-    font-weight:bold;
-}
+/* ══ REMINDERS ══ */
+.rem-list{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.rem-item{background:var(--card);border-radius:var(--radius);padding:14px 16px;border:1.5px solid var(--border);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between}
+.rem-left{display:flex;align-items:center;gap:12px}
+.rem-ic{width:42px;height:42px;border-radius:12px;background:var(--g8);display:flex;align-items:center;justify-content:center;font-size:22px;border:1.5px solid var(--border)}
+.rem-time{font-size:19px;font-weight:800;color:var(--text)}
+.rem-lbl{font-size:12px;color:var(--muted);margin-top:1px}
+.toggle{width:50px;height:28px;background:var(--border);border-radius:99px;position:relative;cursor:pointer;transition:background .2s;border:none;-webkit-appearance:none;flex-shrink:0}
+.toggle.on{background:var(--g3)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:transform .22s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.toggle.on::after{transform:translateX(22px)}
+.add-rem{margin:0 16px;background:var(--g8);border:2px dashed var(--g6);border-radius:var(--radius);padding:15px;text-align:center;font-size:14px;font-weight:700;color:var(--g3);cursor:pointer}
+.add-rem:active{background:var(--g7)}
 
-.bg-circle{
-    fill:none;
-    stroke:#dcefd3;
-    stroke-width:12;
-}
+/* ══ PROFILE ══ */
+.profile-hero{background:linear-gradient(140deg,var(--g1),var(--g3));padding:30px 20px 28px;text-align:center;color:#fff}
+.avatar{width:82px;height:82px;background:rgba(255,255,255,0.18);border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:40px;border:3px solid rgba(255,255,255,0.3)}
+.profile-name{font-size:22px;font-weight:800}
+.profile-sub{font-size:13px;opacity:.75;margin-top:4px}
+.plist{padding:14px 16px 0;display:flex;flex-direction:column;gap:8px}
+.goal-box{background:var(--card);border-radius:var(--radius);padding:16px;border:1.5px solid var(--border);box-shadow:var(--shadow)}
+.goal-box label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:10px}
+.goal-row{display:flex;gap:8px}
+.goal-row input{flex:1;border:2px solid var(--border);border-radius:12px;padding:11px 14px;font-size:16px;font-weight:800;color:var(--text);background:var(--g9);outline:none;-webkit-appearance:none}
+.goal-row input:focus{border-color:var(--g3)}
+.goal-row button{background:var(--g3);color:#fff;border:none;border-radius:12px;padding:11px 18px;font-size:14px;font-weight:800;cursor:pointer}
+.presets{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+.preset{padding:7px 14px;border-radius:99px;border:2px solid var(--border);background:var(--g9);font-size:13px;font-weight:700;color:var(--sub);cursor:pointer;-webkit-appearance:none}
+.preset.on{background:var(--g3);color:#fff;border-color:var(--g3)}
+.dark-row{background:var(--card);border-radius:var(--radius);padding:15px 16px;border:1.5px solid var(--border);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.dark-row-left{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--text)}
+.pl-row{background:var(--card);border-radius:var(--radius);padding:15px 16px;border:1.5px solid var(--border);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.pl-row:active{background:var(--g8)}
+.pl-row-left{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--text)}
 
-.progress-ring{
-    fill:none;
-    stroke:#2e7d32;
-    stroke-width:12;
-    stroke-linecap:round;
-    stroke-dasharray:408;
-    stroke-dashoffset:408;
-    transform:rotate(-90deg);
-    transform-origin:center;
-}
+/* NAV */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;
+  background:var(--card);border-top:1.5px solid var(--border);
+  display:flex;padding:8px 0 calc(env(safe-area-inset-bottom,0px)+8px);z-index:20;
+  box-shadow:0 -2px 10px rgba(29,107,64,0.08)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 0;border:none;background:none;color:var(--muted);font-size:10px;font-weight:700;-webkit-appearance:none;transition:color .2s}
+.nav-btn svg{width:22px;height:22px;stroke-width:2}
+.nav-btn.on{color:var(--g3)}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:var(--g3);margin-top:1px;opacity:0;transition:opacity .2s}
+.nav-btn.on .nav-dot{opacity:1}
 
-.bottle-section{
-    display:flex;
-    justify-content:center;
-    margin-top:25px;
-}
+/* TOAST */
+.toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px)+92px);left:50%;transform:translateX(-50%) translateY(20px);background:#0d2e1a;color:#fff;padding:12px 24px;border-radius:99px;font-size:13px;font-weight:700;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-.bottle{
-    width:120px;
-    height:260px;
-    border:5px solid #2e7d32;
-    border-radius:40px 40px 20px 20px;
-    position:relative;
-    overflow:hidden;
-    background:white;
-}
+/* MILESTONE BANNER */
+.milestone{margin:10px 16px 0;padding:12px 16px;border-radius:var(--radius);font-size:13px;font-weight:700;text-align:center;display:none;animation:popIn .4s ease}
+.milestone.show{display:block}
+.milestone.half{background:#fef3e2;color:#9a6000;border:1.5px solid #f8d98a}
+.milestone.full{background:#e6f7ed;color:#1a6b40;border:1.5px solid var(--g6)}
+[data-dark="1"] .milestone.half{background:#2a1e08;color:#f0c045}
+[data-dark="1"] .milestone.full{background:#0f2e1a;color:#6fc98e}
+@keyframes popIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
 
-.water-level{
-    position:absolute;
-    bottom:0;
-    width:100%;
-    height:0%;
-    background:linear-gradient(#81c784,#43a047);
-    transition:0.6s;
-}
-
-.stats-grid{
-    margin-top:25px;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:15px;
-}
-
-.card{
-    background:white;
-    padding:20px;
-    border-radius:20px;
-    box-shadow:0 6px 15px rgba(0,0,0,0.08);
-}
-
-.card h4{
-    color:#666;
-}
-
-.card p{
-    font-size:28px;
-    font-weight:bold;
-    margin-top:10px;
-    color:#2e7d32;
-}
-
-.quick-buttons{
-    margin-top:15px;
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:10px;
-}
-
-.quick-buttons button{
-    padding:15px;
-    border:none;
-    border-radius:16px;
-    background:white;
-    box-shadow:0 5px 12px rgba(0,0,0,0.08);
-    cursor:pointer;
-}
-
-.quick-buttons button:hover{
-    background:#2e7d32;
-    color:white;
-}
-
-.actions{
-    margin-top:25px;
-    display:flex;
-    gap:15px;
-}
-
-.actions button{
-    flex:1;
-    padding:18px;
-    border:none;
-    border-radius:18px;
-    font-size:18px;
-    cursor:pointer;
-}
-
-.add-btn{
-    background:#2e7d32;
-    color:white;
-}
-
-.reset-btn{
-    background:white;
-}
-
-.reminder-card,
-.chart-card,
-.quote-box{
-    margin-top:25px;
-    background:white;
-    padding:20px;
-    border-radius:22px;
-    box-shadow:0 6px 15px rgba(0,0,0,0.08);
-}
-
-.chart{
-    display:flex;
-    align-items:end;
-    gap:10px;
-    height:120px;
-    margin-top:20px;
-}
-
-.bar{
-    width:30px;
-    background:linear-gradient(#a5d6a7,#2e7d32);
-    border-radius:10px;
-}
-
-.switch{
-    display:inline-block;
-    margin-top:12px;
-}
-
-.slider{
-    display:block;
-    width:60px;
-    height:30px;
-    background:#ccc;
-    border-radius:30px;
-}
-	</style>
+/* ANIM */
+@keyframes floatUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.float{animation:floatUp 3s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 4px 16px rgba(29,107,64,0.35)}50%{box-shadow:0 4px 28px rgba(29,107,64,0.55)}}
+.pulse{animation:pulse 2s ease-in-out infinite}
+</style>
 </head>
 <body>
+<div class="app" id="app">
 
-<div class="app">
-
-    <!-- Header -->
-    <header class="header">
-        <div>
-            <h1>💧 HydroTrack</h1>
-            <p>Stay hydrated, stay healthy</p>
-        </div>
-        <button id="darkToggle">🌙</button>
-    </header>
-
-    <!-- Goal Section -->
-    <section class="goal-box">
-        <label>Daily Goal (Liters)</label>
-        <div class="goal-input">
-            <input type="number" id="goalInput" value="5">
-            <button id="saveGoal">Save</button>
-        </div>
-    </section>
-
-    <!-- Hero Section -->
-    <section class="hero">
-
-        <div class="progress-left">
-            <h2>Today's Progress</h2>
-            <h3><span id="currentWater">0</span> L</h3>
-            <p>of <span id="goalText">5</span> L daily goal</p>
-        </div>
-
-        <div class="progress-circle">
-            <svg width="160" height="160">
-                <circle cx="80" cy="80" r="65" class="bg-circle"/>
-                <circle cx="80" cy="80" r="65" class="progress-ring" id="ring"/>
-            </svg>
-            <div class="percentage" id="percent">0%</div>
-        </div>
-
-    </section>
-
-    <!-- Bottle Hero -->
-    <section class="bottle-section">
-        <div class="bottle">
-            <div class="water-level" id="waterLevel"></div>
-        </div>
-    </section>
-
-    <!-- Stats -->
-    <section class="stats-grid">
-
-        <div class="card">
-            <h4>Remaining</h4>
-            <p id="remaining">5 L</p>
-        </div>
-
-        <div class="card">
-            <h4>Goal</h4>
-            <p id="goalDisplay">5 L</p>
-        </div>
-
-        <div class="card">
-            <h4>Next Target</h4>
-            <p>500 ml</p>
-        </div>
-
-        <div class="card">
-            <h4>Progress</h4>
-            <p id="progressPercent">0%</p>
-        </div>
-
-    </section>
-
-    <!-- Quick Add -->
-    <section>
-        <h3>Quick Add</h3>
-
-        <div class="quick-buttons">
-            <button onclick="addWater(250)">250 ml</button>
-            <button onclick="addWater(500)">500 ml</button>
-            <button onclick="addWater(750)">750 ml</button>
-            <button onclick="addWater(1000)">1 L</button>
-        </div>
-    </section>
-
-    <!-- Action Buttons -->
-    <section class="actions">
-        <button class="add-btn" onclick="addWater(500)">Add Water</button>
-        <button class="reset-btn" onclick="resetWater()">Reset Day</button>
-    </section>
-
-    <!-- Reminder -->
-    <section class="reminder-card">
-        <h3>Reminder</h3>
-        <p>Next Reminder: 8:00 PM</p>
-        <label class="switch">
-            <input type="checkbox" id="reminderToggle">
-            <span class="slider"></span>
-        </label>
-    </section>
-
-    <!-- Weekly Chart -->
-    <section class="chart-card">
-        <h3>Weekly Progress</h3>
-
-        <div class="chart">
-            <div class="bar" style="height:40%"></div>
-            <div class="bar" style="height:60%"></div>
-            <div class="bar" style="height:85%"></div>
-            <div class="bar" style="height:50%"></div>
-            <div class="bar" style="height:90%"></div>
-            <div class="bar" style="height:75%"></div>
-            <div class="bar" style="height:95%"></div>
-        </div>
-    </section>
-
-    <!-- Quote -->
-    <section class="quote-box">
-        <p id="quote">Drink water. Your body will thank you 💚</p>
-    </section>
-
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">💧</div>
+    <div class="brand-text">HydroTrack<small>Daily Water Tracker</small></div>
+  </div>
+  <div class="topbar-r">
+    <div class="date-pill" id="topDate"></div>
+    <button class="icon-btn" onclick="googleLogin()" id="loginBtn" title="Sign in with Google">👤</button>
+    <button class="icon-btn" onclick="toggleDark()">🌙</button>
+  </div>
 </div>
 
-<script>
-let goal = Number(localStorage.getItem("goal")) || 5; // liters
-let water = Number(localStorage.getItem("water")) || 0; // ml
+<!-- ══════════ HOME ══════════ -->
+<div class="screen active" id="sc-home">
 
-const quotes = [
-    "Drink water. Your body will thank you 💚",
-    "Small sips, big health gains 🌿",
-    "Hydration improves focus ⚡",
-    "Water = Energy + Clear skin ✨"
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-bg-circle"></div>
+    <div class="hero-bg-circle2"></div>
+    <div class="hero-top">
+      <div>
+        <div class="hero-label">Today's Progress</div>
+        <div class="hero-amount" id="heroAmt">0.0<sup>L</sup></div>
+        <div class="hero-sub">of <span id="heroGoal">5.0</span> L daily goal</div>
+      </div>
+      <div class="ring-wrap">
+        <svg viewBox="0 0 90 90">
+          <circle cx="45" cy="45" r="37" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="9"/>
+          <circle cx="45" cy="45" r="37" fill="none" stroke="#fff" stroke-width="9"
+            stroke-linecap="round" stroke-dasharray="232.5"
+            id="ringC" stroke-dashoffset="232.5"
+            style="transition:stroke-dashoffset .7s cubic-bezier(.4,0,.2,1)"/>
+        </svg>
+        <div class="ring-pct"><span id="ringPct">0%</span><small>done</small></div>
+      </div>
+    </div>
+
+    <!-- BOTTLE -->
+    <div class="hero-bottle-row float">
+      <svg viewBox="0 0 130 220" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="bc"><path d="M40,54 L27,76 L17,108 L13,200 Q13,212 26,212 L104,212 Q117,212 117,200 L113,108 L103,76 L90,54 Z"/></clipPath>
+          <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#6fc98e" stop-opacity=".95"/>
+            <stop offset="100%" stop-color="#1a6b40"/>
+          </linearGradient>
+          <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.75)"/>
+            <stop offset="50%" stop-color="rgba(255,255,255,0.92)"/>
+            <stop offset="100%" stop-color="rgba(200,235,215,0.7)"/>
+          </linearGradient>
+        </defs>
+        <!-- Strap -->
+        <path d="M90,18 Q112,18 112,36 L112,52 L102,52 L102,40 Q102,28 90,28 L40,28 Q28,28 28,40 L28,52 L18,52 L18,36 Q18,18 40,18 Z" fill="#7a4b28" opacity="0.75"/>
+        <!-- Cap -->
+        <rect x="44" y="6" width="42" height="20" rx="7" fill="#6b3f1e"/>
+        <rect x="40" y="24" width="50" height="32" rx="5" fill="#4e2e14"/>
+        <!-- Body -->
+        <path d="M40,54 L27,76 L17,108 L13,200 Q13,212 26,212 L104,212 Q117,212 117,200 L113,108 L103,76 L90,54 Z" fill="url(#bg2)" stroke="rgba(45,143,88,0.35)" stroke-width="2"/>
+        <!-- Water -->
+        <rect id="bw" x="13" y="212" width="104" height="0" clip-path="url(#bc)" fill="url(#wg)" style="transition:y .9s cubic-bezier(.4,0,.2,1),height .9s cubic-bezier(.4,0,.2,1)"/>
+        <!-- Wave -->
+        <ellipse id="bwv" cx="65" cy="212" rx="56" ry="6" fill="#6fc98e" clip-path="url(#bc)" opacity="0.7" style="transition:cy .9s cubic-bezier(.4,0,.2,1)"/>
+        <!-- Ticks -->
+        <line x1="17" y1="170" x2="113" y2="170" stroke="rgba(45,143,88,0.18)" stroke-width="1.2" stroke-dasharray="5,5"/>
+        <line x1="17" y1="140" x2="113" y2="140" stroke="rgba(45,143,88,0.18)" stroke-width="1.2" stroke-dasharray="5,5"/>
+        <line x1="17" y1="110" x2="113" y2="110" stroke="rgba(45,143,88,0.18)" stroke-width="1.2" stroke-dasharray="5,5"/>
+        <line x1="17" y1="80" x2="113" y2="80" stroke="rgba(45,143,88,0.18)" stroke-width="1.2" stroke-dasharray="5,5"/>
+        <text x="118" y="173" font-size="9" fill="#6fc98e" font-weight="700">1L</text>
+        <text x="118" y="143" font-size="9" fill="#6fc98e" font-weight="700">2L</text>
+        <text x="118" y="113" font-size="9" fill="#6fc98e" font-weight="700">3L</text>
+        <text x="118" y="83" font-size="9" fill="#6fc98e" font-weight="700">4L</text>
+        <!-- Shine -->
+        <path d="M30,78 Q34,120 30,165" stroke="rgba(255,255,255,0.55)" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <path d="M44,72 Q47,100 44,125" stroke="rgba(255,255,255,0.3)" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <!-- Bubbles -->
+        <circle cx="55" cy="190" r="3" fill="rgba(255,255,255,0.4)" opacity="0.8"/>
+        <circle cx="80" cy="175" r="2" fill="rgba(255,255,255,0.3)" opacity="0.7"/>
+        <circle cx="68" cy="200" r="2" fill="rgba(255,255,255,0.35)" opacity="0.6"/>
+      </svg>
+    </div>
+
+    <!-- Wave -->
+    <svg class="hero-wave" viewBox="0 0 430 30" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,20 C80,0 160,30 240,15 C320,0 380,25 430,15 L430,30 L0,30 Z" fill="var(--bg)"/>
+    </svg>
+  </div>
+
+  <!-- MILESTONE -->
+  <div class="milestone half" id="m50">🎉 Halfway there — keep drinking!</div>
+  <div class="milestone full" id="m100">🏆 Goal reached! Incredible work!</div>
+
+  <!-- STAT CARDS -->
+  <div class="stat-cards">
+    <div class="sc"><div class="sc-icon green">💧</div><div class="sc-body"><div class="sc-lbl">Remaining</div><div class="sc-val" id="scRem">5.0 L</div><div class="sc-sub">to go</div></div></div>
+    <div class="sc"><div class="sc-icon blue">🎯</div><div class="sc-body"><div class="sc-lbl">Goal</div><div class="sc-val" id="scGoal">5.0 L</div><div class="sc-sub">daily</div></div></div>
+    <div class="sc"><div class="sc-icon amber">🍶</div><div class="sc-body"><div class="sc-lbl">Bottles Done</div><div class="sc-val" id="scBtl">0/10</div><div class="sc-sub">bottles</div></div></div>
+    <div class="sc"><div class="sc-icon purple">⏰</div><div class="sc-body"><div class="sc-lbl">Next Target</div><div class="sc-val" id="scNext">500 ml</div><div class="sc-sub">next up!</div></div></div>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div class="prog-wrap">
+    <div class="prog-head"><span id="progL">0 L consumed</span><span id="progR">Goal: 5.0 L</span></div>
+    <div class="prog-bg"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  </div>
+
+  <!-- QUICK ADD -->
+  <div class="section">
+    <div class="sec-hdr">Quick Add</div>
+    <div class="qa-row">
+      <button class="qa-btn" onclick="addMl(250)"><span class="drop">💧</span>250 ml</button>
+      <button class="qa-btn sel" onclick="addMl(500)"><span class="drop">💧</span>500 ml</button>
+      <button class="qa-btn" onclick="addMl(750)"><span class="drop">💧</span>750 ml</button>
+      <button class="qa-btn" onclick="addMl(1000)"><span class="drop">💧</span>1 L</button>
+    </div>
+  </div>
+
+  <!-- TIP -->
+  <div class="tip-card">
+    <div class="tip-icon">🌿</div>
+    <div><div class="tip-title">Daily Tip 💬</div><div class="tip-body" id="tipText">Loading your tip...</div></div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="action-row">
+    <button class="btn-add pulse" onclick="addMl(500)">💧 Add Water</button>
+    <button class="btn-reset" onclick="resetDay()">🔄 Reset</button>
+  </div>
+  <div style="height:6px"></div>
+</div>
+
+<!-- ══════════ HISTORY ══════════ -->
+<div class="screen" id="sc-history">
+  <div style="padding:14px 16px 0"><div class="sec-hdr">Weekly Chart</div></div>
+  <div class="chart-card">
+    <div style="font-size:12px;color:var(--muted);font-weight:600">Last 7 Days vs Goal</div>
+    <div class="chart-bars" id="weekChart"></div>
+  </div>
+  <div class="history-list" id="hiList">
+    <div class="sec-hdr">Daily Log</div>
+  </div>
+</div>
+
+<!-- ══════════ STATS ══════════ -->
+<div class="screen" id="sc-stats">
+  <div class="streak-banner">
+    <div class="streak-left"><div class="num" id="streakN">0</div><div class="lbl">🔥 Day Streak</div></div>
+    <div class="streak-icon">🔥</div>
+  </div>
+  <div class="stats-grid">
+    <div class="stats-card"><div class="big" id="stAvg">0.0L</div><div class="lbl">Daily Average</div></div>
+    <div class="stats-card"><div class="big" id="stBest">0.0L</div><div class="lbl">Best Day</div></div>
+    <div class="stats-card"><div class="big" id="stTotal">0L</div><div class="lbl">Week Total</div></div>
+    <div class="stats-card"><div class="big" id="stHit">0/7</div><div class="lbl">Goals Hit</div></div>
+  </div>
+  <div style="padding:14px 16px 0"><div class="sec-hdr">7-Day Overview</div>
+  <div class="chart-card" style="margin:0"><div class="chart-bars" id="statsChart"></div></div></div>
+</div>
+
+<!-- ══════════ REMINDERS ══════════ -->
+<div class="screen" id="sc-reminders">
+  <div style="padding:14px 16px 4px"><div class="sec-hdr">Hydration Reminders</div></div>
+  <div class="rem-list" id="remList"></div>
+  <div class="add-rem" onclick="addReminder()">＋ Add New Reminder</div>
+  <div class="tip-card" style="margin:12px 16px 0">
+    <div class="tip-icon">💡</div>
+    <div><div class="tip-title">Pro Tip</div><div class="tip-body">Set reminders every 90 minutes to comfortably reach your 5L goal throughout the day.</div></div>
+  </div>
+</div>
+
+<!-- ══════════ PROFILE ══════════ -->
+<div class="screen" id="sc-profile">
+  <div class="profile-hero">
+    <div class="avatar">🧑</div>
+    <div class="profile-name">My Profile</div>
+    <div class="profile-sub" id="profSub">Goal: 5.0 L / day</div>
+  </div>
+  <div class="plist">
+    <div class="goal-box">
+      <label>Set Daily Water Goal</label>
+      <div class="goal-row">
+        <input type="number" id="goalIn" value="5" min="0.5" max="15" step="0.5"/>
+        <button onclick="saveGoal()">Save</button>
+      </div>
+      <div class="presets" id="presetRow">
+        <button class="preset" onclick="setP(2)">2 L</button>
+        <button class="preset" onclick="setP(2.5)">2.5 L</button>
+        <button class="preset" onclick="setP(3)">3 L</button>
+        <button class="preset" onclick="setP(4)">4 L</button>
+        <button class="preset on" onclick="setP(5)">5 L</button>
+        <button class="preset" onclick="setP(7)">7 L</button>
+      </div>
+    </div>
+    <div class="dark-row" onclick="toggleDark()">
+      <div class="dark-row-left"><span style="font-size:22px">🌙</span> Dark Mode</div>
+      <button class="toggle" id="darkBtn"></button>
+    </div>
+    <div class="pl-row" onclick="showQuote()">
+      <div class="pl-row-left"><span style="font-size:22px">✨</span> Motivational Quote</div>
+      <span style="color:var(--muted);font-size:13px">Tap ›</span>
+    </div>
+    <div class="pl-row" onclick="clearData()">
+      <div class="pl-row-left"><span style="font-size:22px">🗑️</span> Clear All Data</div>
+      <span style="color:var(--muted);font-size:13px">Reset ›</span>
+    </div>
+  </div>
+  <div class="tip-card" id="quoteBox" style="margin:10px 16px 14px;display:none">
+    <div class="tip-icon">✨</div>
+    <div><div class="tip-title">Motivation</div><div class="tip-body" id="quoteText"></div></div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn on" onclick="go('home',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    Home<div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" onclick="go('history',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+    History<div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" onclick="go('stats',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Stats<div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" onclick="go('reminders',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+    Reminders<div class="nav-dot"></div>
+  </button>
+  <button class="nav-btn" onclick="go('profile',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Profile<div class="nav-dot"></div>
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyBNRQL_ZbRv5P_OSimHIROVsEalnsq4CFg",
+  authDomain: "hydrotracker-1189.firebaseapp.com",
+  projectId: "hydrotracker-1189",
+  storageBucket: "hydrotracker-1189.firebasestorage.app",
+  messagingSenderId: "761723535858",
+  appId: "1:761723535858:web:d5355f615f7b4aac2aab6b"
+};
+const app = initializeApp(firebaseConfig);
+window.auth = getAuth(app);
+window.provider = new GoogleAuthProvider();
+window.db = getFirestore(app);
+window.fb = {
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  doc,
+  setDoc,
+  getDoc
+};
+</script>
+
+<script>
+// ── DATA ──
+const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const TIPS=[
+  'Your body is 70% water. So are you. Drink up! 💧',
+  'Start every morning with 500 ml before anything else.',
+  'Drink a glass before every meal — it aids digestion too.',
+  'Staying hydrated boosts energy by up to 30%. Feel it!',
+  'Set alarms every 90 mins — that\'s how you hit 5L!',
+  'Pale yellow urine means you\'re perfectly hydrated. ✅',
+  'Add mint or lemon slices to make water more enjoyable.',
+  'Drink 250 ml for every 30 minutes of exercise.',
+  'Headache? You\'re probably dehydrated. Drink up now!',
+  'Morning hydration jumpstarts your metabolism 🔥',
+  'Carry a 1L bottle — refill it 5 times = goal done!',
+  'Water flushes toxins, clears skin, and sharpens focus.',
+];
+const QUOTES=[
+  '"Water is the driving force of all nature." – Leonardo da Vinci',
+  '"In every drop of water, there is a story of life." – Leena Arif',
+  '"Thousands have lived without love, not one without water." – W.H. Auden',
+  '"Water is life, and clean water means health." – Audrey Hepburn',
+  '"You are not sick, you are thirsty." – Dr. F. Batmanghelidj',
+  '"Empty your mind, be formless, shapeless — like water." – Bruce Lee',
+  '"A drop of water, if it could write out its own history, would explain the universe to us." – Lucy Larcom',
 ];
 
-const goalInput = document.getElementById("goalInput");
-const goalText = document.getElementById("goalText");
-const goalDisplay = document.getElementById("goalDisplay");
-const currentWater = document.getElementById("currentWater");
-const remaining = document.getElementById("remaining");
-const percent = document.getElementById("percent");
-const progressPercent = document.getElementById("progressPercent");
-const waterLevel = document.getElementById("waterLevel");
-const ring = document.getElementById("ring");
-const quote = document.getElementById("quote");
-const darkToggle = document.getElementById("darkToggle");
+let currentUser = null;
+let goalMl=5000, drankMl=0, dark=0, hist={}, rems=[
+  {t:'06:30',l:'Morning kickstart',on:true},
+  {t:'08:30',l:'Mid morning',on:true},
+  {t:'10:30',l:'Pre lunch',on:false},
+  {t:'12:30',l:'After lunch',on:true},
+  {t:'14:30',l:'Afternoon boost',on:true},
+  {t:'16:30',l:'Evening hydration',on:false},
+  {t:'18:30',l:'Pre dinner',on:false},
+  {t:'20:30',l:'Night routine',on:false},
+];
 
-goalInput.value = goal;
-
-function updateUI() {
-    const goalMl = goal * 1000;
-    const percentage = Math.min(Math.round((water / goalMl) * 100), 100);
-
-    currentWater.textContent = (water / 1000).toFixed(1);
-    goalText.textContent = goal;
-    goalDisplay.textContent = goal + " L";
-
-    remaining.textContent =
-        Math.max(((goalMl - water) / 1000), 0).toFixed(1) + " L";
-
-    percent.textContent = percentage + "%";
-    progressPercent.textContent = percentage + "%";
-
-    // bottle fill
-    waterLevel.style.height = percentage + "%";
-
-    // circle animation
-    const circumference = 408;
-    const offset = circumference - (percentage / 100) * circumference;
-    ring.style.strokeDashoffset = offset;
-
-    localStorage.setItem("goal", goal);
-    localStorage.setItem("water", water);
+function key(){
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
 }
 
-function addWater(amount) {
-    water += amount;
-    updateUI();
+function load(){
+  const d=new Date();
+  document.getElementById('topDate').textContent=DAYS[d.getDay()]+', '+d.getDate()+' '+MONTHS[d.getMonth()];
+  let s={};
+  try{s=JSON.parse(localStorage.getItem('ht2')||'{}');}catch(e){}
+  goalMl=(s.goal||5)*1000;
+  dark=s.dark||0;
+  hist=s.hist||{};
+  if(s.rems)rems=s.rems;
+  drankMl=hist[key()]||0;
+  if(dark){document.documentElement.setAttribute('data-dark','1');document.getElementById('darkBtn').classList.add('on');}
+  document.getElementById('goalIn').value=goalMl/1000;
+  document.getElementById('tipText').textContent=TIPS[Math.floor(Math.random()*TIPS.length)];
+  syncPresets();update();renderRems();
 }
 
-function resetWater() {
-    water = 0;
-    updateUI();
+async function save(){
+  hist[key()] = drankMl;
+  localStorage.setItem(
+    'ht2',
+    JSON.stringify({ goal: goalMl/1000, dark, hist, rems })
+  );
+  await saveToCloud();
 }
 
-document.getElementById("saveGoal").addEventListener("click", () => {
-    goal = Number(goalInput.value);
+function update(){
+  const pct=Math.min(100,Math.round((drankMl/goalMl)*100));
+  const L=(drankMl/1000).toFixed(1);
+  const rem=Math.max(0,goalMl-drankMl);
+  const gL=(goalMl/1000).toFixed(1);
+  const btlD=Math.floor(drankMl/500), btlT=Math.ceil(goalMl/500);
+  // hero
+  document.getElementById('heroAmt').innerHTML=L+'<sup>L</sup>';
+  document.getElementById('heroGoal').textContent=gL;
+  document.getElementById('ringPct').textContent=pct+'%';
+  document.getElementById('ringC').style.strokeDashoffset=232.5-(232.5*pct/100);
+  // bottle
+  const maxH=103, wH=Math.round((pct/100)*maxH), wY=212-wH;
+  document.getElementById('bw').setAttribute('y',wY);
+  document.getElementById('bw').setAttribute('height',wH);
+  document.getElementById('bwv').setAttribute('cy',wY);
+  // cards
+  document.getElementById('scRem').textContent=(rem/1000).toFixed(1)+' L';
+  document.getElementById('scGoal').textContent=gL+' L';
+  document.getElementById('scBtl').textContent=btlD+'/'+btlT;
+  document.getElementById('scNext').textContent=drankMl>=goalMl?'Done!':(btlD+1)*500+' ml';
+  // bar
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progL').textContent=L+' L consumed';
+  document.getElementById('progR').textContent='Goal: '+gL+' L';
+  // profile
+  document.getElementById('profSub').textContent='Goal: '+gL+' L / day';
+  // milestones
+  document.getElementById('m50').className='milestone half'+(pct>=50&&pct<100?' show':'');
+  document.getElementById('m100').className='milestone full'+(pct>=100?' show':'');
+}
 
-    if (goal <= 0) {
-        alert("Goal must be greater than 0");
-        return;
+function addMl(v){
+  drankMl=Math.min(goalMl,drankMl+v);
+  save();update();
+  toast('💧 +'+v+' ml added!');
+  if(drankMl>=goalMl)setTimeout(()=>toast('🏆 Goal reached! Amazing!'),900);
+}
+
+function resetDay(){
+  if(confirm('Reset today\'s water to 0?')){drankMl=0;save();update();toast('Day reset ✅');}
+}
+
+function saveGoal(){
+  const v=parseFloat(document.getElementById('goalIn').value);
+  if(!v||v<0.5||v>15){toast('Please enter 0.5–15 L');return;}
+  goalMl=Math.round(v*1000);syncPresets();save();update();toast('Goal set to '+v+' L 🎯');
+}
+
+function setP(v){document.getElementById('goalIn').value=v;saveGoal();}
+
+function syncPresets(){
+  const v=goalMl/1000;
+  document.querySelectorAll('.preset').forEach(b=>{
+    b.classList.toggle('on',parseFloat(b.textContent)===v);
+  });
+}
+
+function toggleDark(){
+  dark=dark?0:1;
+  document.documentElement.setAttribute('data-dark',dark?'1':'');
+  document.getElementById('darkBtn').classList.toggle('on',!!dark);
+  save();toast(dark?'🌙 Dark mode on':'☀️ Light mode on');
+}
+
+function go(id,el){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sc-'+id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(n=>n.classList.remove('on'));
+  if(el)el.classList.add('on');
+  if(id==='history')renderHistory();
+  if(id==='stats')renderStats();
+}
+
+// ── DATE KEY HELPER (matches Firestore-safe key format) ──
+function dateKey(date){
+  return `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
+}
+
+// ── HISTORY ──
+function renderHistory(){
+  const now=new Date();
+  // chart
+  const wc=document.getElementById('weekChart');wc.innerHTML='';
+  let maxV=Math.max(goalMl,...Object.values(hist).map(Number));
+  for(let i=6;i>=0;i--){
+    const d=new Date(now);d.setDate(now.getDate()-i);
+    const ml=hist[dateKey(d)]||0;
+    const h=Math.max(4,Math.round((ml/maxV)*85));
+    const isToday=i===0, isHit=ml>=goalMl;
+    const col=document.createElement('div');col.className='cbar-col';
+    col.innerHTML=`<div class="cbar${isToday?' today':isHit?' hit':''}" style="height:${h}px"></div>
+      <div class="cbar-day">${DAYS[d.getDay()]}</div>
+      <div class="cbar-ml">${ml?((ml/1000).toFixed(1)+'L'):'-'}</div>`;
+    wc.appendChild(col);
+  }
+  // list
+  const hl=document.getElementById('hiList');
+  hl.innerHTML='<div class="sec-hdr">Daily Log</div>';
+  for(let i=6;i>=0;i--){
+    const d=new Date(now);d.setDate(now.getDate()-i);
+    const ml=hist[dateKey(d)]||0;
+    const pct=Math.min(100,Math.round((ml/goalMl)*100));
+    const hit=ml>=goalMl;
+    const div=document.createElement('div');div.className='hi-item';
+    div.innerHTML=`<div class="hi-top">
+      <div class="hi-date">${DAYS[d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]}${i===0?' (Today)':''}</div>
+      <div class="hi-badge ${hit?'hit':'miss'}">${hit?'✅ Goal Hit':'⏳ In Progress'}</div>
+    </div>
+    <div class="hi-bar-wrap"><div class="hi-bar" style="width:${pct}%"></div></div>
+    <div class="hi-bottom"><span>${(ml/1000).toFixed(1)} L consumed</span><span>${pct}% of goal</span></div>`;
+    hl.appendChild(div);
+  }
+}
+
+// ── STATS ──
+function renderStats(){
+  const now=new Date();
+  const vals=[],days=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date(now);d.setDate(now.getDate()-i);
+    const ml=hist[dateKey(d)]||0;
+    vals.push(ml);days.push(d);
+  }
+  const total=vals.reduce((a,b)=>a+b,0);
+  const avg=total/7;
+  const best=Math.max(...vals);
+  const hit=vals.filter(v=>v>=goalMl).length;
+  let streak=0;
+  for(let i=vals.length-1;i>=0;i--){if(vals[i]>=goalMl)streak++;else break;}
+  document.getElementById('streakN').textContent=streak;
+  document.getElementById('stAvg').textContent=(avg/1000).toFixed(1)+'L';
+  document.getElementById('stBest').textContent=(best/1000).toFixed(1)+'L';
+  document.getElementById('stTotal').textContent=(total/1000).toFixed(0)+'L';
+  document.getElementById('stHit').textContent=hit+'/7';
+  // chart
+  const sc=document.getElementById('statsChart');sc.innerHTML='';
+  const maxV=Math.max(goalMl,...vals);
+  vals.forEach((ml,i)=>{
+    const h=Math.max(4,Math.round((ml/maxV)*85));
+    const isToday=i===6,isHit=ml>=goalMl;
+    const col=document.createElement('div');col.className='cbar-col';
+    col.innerHTML=`<div class="cbar${isToday?' today':isHit?' hit':''}" style="height:${h}px"></div>
+      <div class="cbar-day">${DAYS[days[i].getDay()]}</div>
+      <div class="cbar-ml">${ml?((ml/1000).toFixed(1)+'L'):'-'}</div>`;
+    sc.appendChild(col);
+  });
+}
+
+// ── REMINDERS ──
+function renderRems(){
+  const list=document.getElementById('remList');list.innerHTML='';
+  rems.forEach((r,i)=>{
+    const div=document.createElement('div');div.className='rem-item';
+    div.innerHTML=`<div class="rem-left">
+      <div class="rem-ic">⏰</div>
+      <div><div class="rem-time">${r.t}</div><div class="rem-lbl">${r.l}</div></div>
+    </div>
+    <button class="toggle${r.on?' on':''}" onclick="toggleRem(${i})" aria-label="toggle"></button>`;
+    list.appendChild(div);
+  });
+}
+function toggleRem(i){rems[i].on=!rems[i].on;save();renderRems();toast(rems[i].on?'🔔 Reminder on':'🔕 Reminder off');}
+function addReminder(){
+  const t=prompt('Enter time (e.g. 09:30):','09:30');
+  if(!t||!/^\d{1,2}:\d{2}$/.test(t))return;
+  const l=prompt('Reminder label:','Hydration break');
+  if(!l)return;
+  rems.push({t,l,on:true});save();renderRems();toast('🔔 Reminder added!');
+}
+
+// ── QUOTES ──
+function showQuote(){
+  const q=QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  document.getElementById('quoteText').textContent=q;
+  const qb=document.getElementById('quoteBox');
+  qb.style.display='flex';
+  qb.scrollIntoView({behavior:'smooth'});
+}
+
+function clearData(){
+  if(confirm('Clear ALL data? This cannot be undone.')){localStorage.removeItem('ht2');location.reload();}
+}
+
+let tt;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2300);
+}
+
+// ── STEP 4: Google Login ──
+async function googleLogin(){
+  if(currentUser){
+    if(confirm('Logout from ' + currentUser.displayName + '?')){
+      const { signOut } = window.fb;
+      await signOut(window.auth);
+      currentUser = null;
+      document.getElementById('loginBtn').textContent = '👤';
+      toast('Logged out 👋');
     }
+    return;
+  }
+  const { signInWithPopup } = window.fb;
+  try{
+    const result = await signInWithPopup(window.auth, window.provider);
+    currentUser = result.user;
+    document.getElementById('loginBtn').textContent = '👋';
+    toast('Welcome ' + currentUser.displayName + ' 👋');
+    await loadFromCloud();
+    update();
+  }
+  catch(error){
+    console.log(error);
+    toast('Login failed — try again');
+  }
+}
 
-    updateUI();
+// ── STEP 5: Save to Cloud ──
+async function saveToCloud(){
+  if(!currentUser) return;
+  const { doc, setDoc } = window.fb;
+  try{
+    await setDoc(doc(window.db, 'users', currentUser.uid), {
+      goal: goalMl,
+      dark: dark,
+      hist: hist,
+      rems: rems
+    }, { merge: true });
+  }
+  catch(error){
+    console.log('Cloud save error:', error);
+  }
+}
+
+// ── STEP 6: Load from Cloud ──
+async function loadFromCloud(){
+  if(!currentUser) return;
+  const { doc, getDoc } = window.fb;
+  try{
+    const snap = await getDoc(doc(window.db, 'users', currentUser.uid));
+    if(snap.exists()){
+      const d = snap.data();
+      goalMl = d.goal || goalMl;
+      dark   = d.dark || dark;
+      hist   = d.hist || hist;
+      rems   = d.rems || rems;
+      drankMl = hist[key()] || 0;
+      if(dark){
+        document.documentElement.setAttribute('data-dark','1');
+        document.getElementById('darkBtn').classList.add('on');
+      }
+      document.getElementById('goalIn').value = goalMl / 1000;
+      syncPresets();
+      renderRems();
+      toast('☁️ Data loaded from cloud!');
+    }
+  }
+  catch(error){
+    console.log('Cloud load error:', error);
+  }
+}
+
+// ── STEP 8: Auto-login on refresh ──
+// onAuthStateChanged runs AFTER load() so cloud data always wins over localStorage
+
+load();
+
+window.fb.onAuthStateChanged(window.auth, async (user) => {
+  if(user){
+    currentUser = user;
+    document.getElementById('loginBtn').textContent = '👋';
+    await loadFromCloud();
+    update();
+  }
 });
-
-darkToggle.addEventListener("click", () => {
-    document.body.classList.toggle("dark-mode");
-});
-
-setInterval(() => {
-    quote.textContent = quotes[Math.floor(Math.random() * quotes.length)];
-}, 5000);
-
-updateUI();
 </script>
 </body>
 </html>
